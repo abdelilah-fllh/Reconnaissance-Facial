@@ -17,7 +17,7 @@ ADD COLUMN statut TEXT,
 ADD COLUMN role TEXT;
 ```
 
-## Before launching the interface, run the create_admin.py script to create the admin login: 
+## Before launching the interface, run the `create_admin.py` script to create the admin login: 
 ```cmd
 python create_admin.py
 ```
