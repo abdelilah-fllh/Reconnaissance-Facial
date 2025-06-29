@@ -1,0 +1,29 @@
+# Byte-compiled / cache files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Logs
+*.log
+access_log.csv
+
+# DeepFace and OpenCV temp files
+temp.jpg
+temp/*.jpg
+*.bak
+
+# Jupyter/IPython
+.ipynb_checkpoints/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Virtual environments
+env/
+venv/
+.venv/
+
+# Streamlit cache
+.streamlit/

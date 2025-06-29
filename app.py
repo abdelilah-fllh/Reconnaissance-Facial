@@ -9,7 +9,7 @@ from db import get_connection
 
 LOG_FILE = "access_log.csv"
 
-def get_fullname_from_postgres(filename):
+def get_fullname_from_filename(filename):
     try:
         filename = os.path.basename(filename)
         conn = get_connection()
@@ -21,7 +21,7 @@ def get_fullname_from_postgres(filename):
         res = cur.fetchone()
         return res[0] if res else filename
     except Exception as e:
-        print(f"[DB] {e}")
+        print(f"[DB ERROR] {e}")
         return filename
     finally:
         if 'conn' in locals():
@@ -36,7 +36,7 @@ def get_all_image_paths():
         result = cur.fetchall()
         return [row[0] for row in result]
     except Exception as e:
-        print(f"[DB] {e}")
+        print(f"[DB ERROR] {e}")
         return []
     finally:
         if 'conn' in locals():
@@ -45,8 +45,7 @@ def get_all_image_paths():
 
 def log_access(person, status):
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    df = pd.DataFrame([[now, person, status]],
-                      columns=["datetime", "person", "status"])
+    df = pd.DataFrame([[now, person, status]], columns=["datetime", "person", "status"])
     df.to_csv(LOG_FILE, mode='a', header=not os.path.exists(LOG_FILE), index=False)
 
 def recognize_face(img_path):
@@ -66,15 +65,16 @@ def recognize_face(img_path):
 
             if res[0].shape[0] > 0:
                 filename = os.path.basename(res[0].iloc[0]['identity'])
-                fullname = get_fullname_from_postgres(filename)
+                fullname = get_fullname_from_filename(filename)
                 print(f"✅ Accès autorisé : {fullname}")
                 log_access(fullname, "autorisé")
             else:
                 print("⛔ Accès refusé")
                 log_access("inconnu", "refusé")
     except Exception as e:
-        print(f"Erreur : {e}")
+        print(f"[RECOGNITION ERROR] {e}")
 
+# === Webcam Execution ===
 cap = cv2.VideoCapture(0)
 print("Appuyez sur ESPACE pour scanner, 'q' pour quitter.")
 
