@@ -48,7 +48,6 @@ if st.sidebar.button("🚪 Se déconnecter"):
 # === Admin tools ===
 st.sidebar.markdown("### ➕ Ajouter un utilisateur")
 new_name = st.sidebar.text_input("Nom complet")
-new_statut = st.sidebar.text_input("Statut")
 new_role = st.sidebar.selectbox("Rôle", ["agent", "technicien", "visiteur"])
 new_photo = st.sidebar.file_uploader("Photo (JPG uniquement)", type=["jpg"])
 
@@ -62,9 +61,9 @@ if new_name and new_photo:
         conn = get_connection()
         cur = conn.cursor()
         cur.execute("""
-            INSERT INTO users (filename, fullname, statut, role)
-            VALUES (%s, %s, %s, %s)
-        """, (filename, new_name, new_statut, new_role))
+            INSERT INTO users (filename, fullname, role)
+            VALUES (%s, %s, %s)
+        """, (filename, new_name, new_role))
         conn.commit()
         st.sidebar.success("Utilisateur ajouté avec succès ✅")
     except Exception as e:
@@ -82,21 +81,23 @@ def log_access(person, status):
 # Facial recognition
 def recognize_face(frame):
     temp = "temp.jpg"
-    frame = cv2.resize(frame, (640, 480))  # 🔧 Resize to avoid huge arrays
+    frame = cv2.resize(frame, (640, 480))
     cv2.imwrite(temp, frame)
     try:
         conn = get_connection()
         cur = conn.cursor()
-        cur.execute("SELECT filename FROM users")
-        image_paths = [row[0] for row in cur.fetchall()]
+        cur.execute("SELECT filename, fullname FROM users")
+        rows = cur.fetchall()
         cur.close()
         conn.close()
 
-        if not image_paths:
+        if not rows:
             return "❌ Aucune image dans la base."
 
+        path_to_name = {row[0]: row[1] for row in rows}
+
         with tempfile.TemporaryDirectory() as temp_dir:
-            for path in image_paths:
+            for path in path_to_name.keys():
                 if os.path.exists(path):
                     img = cv2.imread(path)
                     if img is not None and img.shape[0] < 3000 and img.shape[1] < 3000:
@@ -105,14 +106,21 @@ def recognize_face(frame):
             res = DeepFace.find(
                 img_path=temp,
                 db_path=temp_dir,
-                model_name='Facenet512',  # ✅ lightweight model to reduce memory
+                model_name='Facenet512',
                 enforce_detection=False
             )
 
             if res[0].shape[0] > 0:
-                res[0] = res[0].iloc[:1]  # ✅ limit to top match only
+                res[0] = res[0].iloc[:1]
                 matched_path = res[0].iloc[0]['identity']
-                fullname = os.path.basename(matched_path).replace(".jpg", "").replace("_", " ")
+                matched_filename = os.path.basename(matched_path)
+                for full_path, name in path_to_name.items():
+                    if os.path.basename(full_path) == matched_filename:
+                        fullname = name
+                        break
+                else:
+                    fullname = matched_filename
+
                 log_access(fullname, "autorisé")
                 return f"✅ Accès autorisé : {fullname}"
             else:
