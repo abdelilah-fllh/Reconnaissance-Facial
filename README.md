@@ -1,6 +1,6 @@
-#Système de Contrôle d’Accès par Reconnaissance Faciale
+# Système de Contrôle d’Accès par Reconnaissance Faciale
 
-##Create login table:
+## Create login table:
 ```sql
 CREATE TABLE login (
     id SERIAL PRIMARY KEY,
@@ -10,13 +10,16 @@ CREATE TABLE login (
 );
 ```
 
-##updating "users" table:
+## updating "users" table:
 ```sql
 ALTER TABLE users
 ADD COLUMN statut TEXT,
 ADD COLUMN role TEXT;
 ```
 
-##Before launching the interface, run the create_admin.py script to create the admin login:  
+## Before launching the interface, run the create_admin.py script to create the admin login: 
+```cmd
+python create_admin.py
+```
 **Username:** admin  
 **Password:** admin123  
