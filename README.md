@@ -1,13 +1,14 @@
 #Système de Contrôle d’Accès par Reconnaissance Faciale
 
 ##Create login table:
-````sql
+```sql
 CREATE TABLE login (
     id SERIAL PRIMARY KEY,
     username TEXT UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
     fullname TEXT NOT NULL
 );
+```
 
 ##updating "users" table:
 ```sql
