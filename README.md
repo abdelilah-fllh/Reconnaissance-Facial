@@ -18,5 +18,5 @@ ADD COLUMN role TEXT;
 ```
 
 ##Before launching the interface, run the create_admin.py script to create the admin login:  
-**Username:** admin
-**Password:** admin123
+**Username:** admin  
+**Password:** admin123  
